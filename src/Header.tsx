@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useApp } from "./script";
 import { REQUEST_TYPE_LABEL } from "./script/constants";
 import type { RequestType } from "./script/types";
+import AddStaffModal from "./AddStaffModal";
 
 const REQUEST_TYPES: RequestType[] = ["sample", "pattern", "smv"];
 
@@ -18,6 +19,7 @@ function Header() {
   } = useApp();
 
   const [open, setOpen] = useState(false);
+  const [addStaffOpen, setAddStaffOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -68,6 +70,25 @@ function Header() {
 
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <span className="chip">{requestCountLabel}</span>
+          <button
+            type="button"
+            className="dtdy"
+            onClick={() => setAddStaffOpen(true)}
+            style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
+          >
+            <svg
+              width="11"
+              height="11"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+            >
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Add staff
+          </button>
         </div>
       </div>
 
@@ -164,6 +185,10 @@ function Header() {
           Report
         </button>
       </div>
+
+      {addStaffOpen && (
+        <AddStaffModal onClose={() => setAddStaffOpen(false)} />
+      )}
     </header>
   );
 }

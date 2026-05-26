@@ -1,6 +1,5 @@
 import type { MouseEvent } from "react";
 import { useApp } from "./script";
-import { HANDLERS_BY_TYPE } from "./script/constants";
 import {
   getStatus,
   initials,
@@ -12,11 +11,11 @@ import {
 import type { Assignment, Sampler } from "./script/types";
 
 function Modal() {
-  const { modalItem, items, assignments, closeModal, openModal } = useApp();
+  const { modalItem, items, assignments, handlersByType, closeModal, openModal } = useApp();
   if (!modalItem) return null;
   const d = modalItem;
 
-  const itemHandlers = HANDLERS_BY_TYPE[d.type ?? "sample"];
+  const itemHandlers = handlersByType[d.type ?? "sample"];
   const assignedRows: { s: Sampler; a: Assignment }[] = [];
   itemHandlers.forEach((s) => {
     const a = (assignments[s.id] || []).find((x) => x.reqNo === d.no);
@@ -240,7 +239,7 @@ function Modal() {
                 .slice()
                 .reverse()
                 .map((x) => {
-                  const st = getStatus(x.no, HANDLERS_BY_TYPE[x.type ?? "sample"], assignments);
+                  const st = getStatus(x.no, handlersByType[x.type ?? "sample"], assignments);
                   return (
                     <div
                       key={x.no}

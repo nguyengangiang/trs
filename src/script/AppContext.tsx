@@ -10,12 +10,13 @@ import {
 } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
-  ALL_HANDLERS,
   EMPTY_NEW_FORM,
   GAS_URL,
-  HANDLERS_BY_TYPE,
+  PATTERN_MAKERS,
   REQUIRED_FORM_FIELDS,
+  SAMPLERS,
   SAMPLER_PHOTOS,
+  SMV_STAFF,
   ZOOM_MAX_D,
   ZOOM_MAX_H,
   ZOOM_MIN_D,
@@ -52,6 +53,8 @@ import {
 export type AppContextValue = {
   items: RequestItem[];
   handlers: Sampler[];
+  handlersByType: Record<RequestType, Sampler[]>;
+  allHandlers: Sampler[];
   requestType: RequestType;
   vd: Date;
   flt: string;
@@ -91,6 +94,10 @@ export type AppContextValue = {
   goToday: () => void;
   setView: (view: ViewId) => void;
   setRequestType: (t: RequestType) => void;
+  addHandler: (
+    type: RequestType,
+    input: { name: string; eid: string; level: string },
+  ) => void;
   setFilter: (brand: string) => void;
   setZoom: (z: SchZoom) => void;
   adjustZoom: (delta: number, mouseRatio: number) => void;
@@ -217,8 +224,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
   });
   const [newForm, setNewForm] = useState<NewRequestForm>({ ...EMPTY_NEW_FORM });
   const [formErrors, setFormErrors] = useState<Set<string>>(new Set());
+  const [handlersByType, setHandlersByType] = useState<Record<RequestType, Sampler[]>>(() => ({
+    sample: [...SAMPLERS],
+    pattern: [...PATTERN_MAKERS],
+    smv: [...SMV_STAFF],
+  }));
+  const handlers = useMemo(
+    () => handlersByType[requestType],
+    [handlersByType, requestType],
+  );
+  const allHandlers = useMemo(
+    () => [...handlersByType.sample, ...handlersByType.pattern, ...handlersByType.smv],
+    [handlersByType],
+  );
   const [assignments, setAssignments] = useState<Record<string, Assignment[]>>(() =>
-    createEmptyAssignments(ALL_HANDLERS.map((s) => s.id)),
+    createEmptyAssignments(
+      [...SAMPLERS, ...PATTERN_MAKERS, ...SMV_STAFF].map((s) => s.id),
+    ),
   );
   const [draggedNo, setDraggedNo] = useState<number | null>(null);
   const [schZoom, setSchZoom] = useState<SchZoom>("day");
@@ -289,6 +311,37 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setRequestTypeState(t);
     setFlt("ALL");
   }, []);
+
+  const addHandler = useCallback(
+    (
+      type: RequestType,
+      input: { name: string; eid: string; level: string },
+    ) => {
+      const name = input.name.trim();
+      const eid = input.eid.trim();
+      const level = input.level.trim() || "Staff";
+      if (!name || !eid) {
+        showToast("Name and Employee ID are required.", false);
+        return;
+      }
+
+      const prefix =
+        type === "sample" ? "spl" : type === "pattern" ? "pat" : "smv";
+      const allIds = new Set(allHandlers.map((s) => s.id));
+      let n = 1;
+      while (allIds.has(`${prefix}-${String(n).padStart(3, "0")}`)) n += 1;
+      const id = `${prefix}-${String(n).padStart(3, "0")}`;
+      const newSampler: Sampler = { id, name, eid, level };
+
+      setHandlersByType((prev) => ({
+        ...prev,
+        [type]: [...prev[type], newSampler],
+      }));
+      setAssignments((prev) => ({ ...prev, [id]: [] }));
+      showToast(`Added ${name}.`, true);
+    },
+    [allHandlers, showToast],
+  );
 
   const setFilter = useCallback((brand: string) => setFlt(brand), []);
 
@@ -431,14 +484,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setItems((prev) => prev.filter((x) => x.no !== no));
       setAssignments((prev) => {
         const next = { ...prev };
-        ALL_HANDLERS.forEach((s) => {
+        allHandlers.forEach((s) => {
           next[s.id] = (next[s.id] || []).filter((a) => a.reqNo !== no);
         });
         return next;
       });
       showToast(`Request #${String(no).padStart(3, "0")} cancelled.`, false);
     },
-    [showToast],
+    [allHandlers, showToast],
   );
 
   const slotAction = useCallback(
@@ -468,8 +521,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
     setDraggedNo(null);
   }, []);
-
-  const handlers = useMemo(() => HANDLERS_BY_TYPE[requestType], [requestType]);
 
   const typedItems = useMemo(
     () => items.filter((d) => (d.type ?? "sample") === requestType),
@@ -538,6 +589,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     () => ({
       items,
       handlers,
+      handlersByType,
+      allHandlers,
       requestType,
       vd,
       flt,
@@ -577,6 +630,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       goToday,
       setView,
       setRequestType,
+      addHandler,
       setFilter,
       setZoom,
       adjustZoom,
@@ -593,13 +647,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       registerWorksheetInput,
     }),
     [
-      items, handlers, requestType, typedItems, vd, flt, activeView, toast, modalNo,
+      items, handlers, handlersByType, allHandlers, requestType, typedItems, vd, flt, activeView, toast, modalNo,
       editOpen, editingNo, editForm, newForm,
       formErrors, assignments, draggedNo, schZoom, hw, dw, zoomPct, submitting,
       activeItems, finishedItems, monthFiltered, summary, brandFilters, modalItem,
       reportData, samplerLanes, approvedRows,
       resetForm, setNewFormField, setEditFormField, setWorksheetFile, submitRequest,
-      nudge, goToday, setView, setRequestType, setFilter, setZoom, adjustZoom, showToast,
+      nudge, goToday, setView, setRequestType, addHandler, setFilter, setZoom, adjustZoom, showToast,
       openModal, closeModal, openEditModal, closeEditModal, saveEdit, cancelRequest,
       slotAction, dropOnLane, triggerWorksheetInput, registerWorksheetInput,
     ],
