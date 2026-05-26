@@ -421,18 +421,18 @@ function Schedule() {
         })
       )}
 
-      {todayIdx >= 0 && (
+      {/* {todayIdx >= 0 && (
         <div
           className="today-line"
           style={{ left: LW + todayIdx * dw + dw / 2, top: 48 }}
         />
-      )}
+      )} */}
     </div>
   );
 
   const renderHourView = () => {
     const totalSlots = days.length * SLOTS_PER_DAY;
-    const todaySlotIdx = todayIdx >= 0 ? todayIdx * SLOTS_PER_DAY : -1;
+    // const todaySlotIdx = todayIdx >= 0 ? todayIdx * SLOTS_PER_DAY : -1;
 
     return (
       <div
@@ -693,12 +693,12 @@ function Schedule() {
           })
         )}
 
-        {todaySlotIdx >= 0 && (
+        {/* {todaySlotIdx >= 0 && (
           <div
             className="today-line"
             style={{ left: LW + todaySlotIdx * hw + hw / 2, top: 72 }}
           />
-        )}
+        )} */}
       </div>
     );
   };
@@ -761,32 +761,6 @@ function Schedule() {
             marginLeft: "auto",
           }}
         >
-          <span
-            id="zoom-indicator"
-            style={{
-              fontSize: 9,
-              color: "var(--hi)",
-              fontFamily: "var(--mono)",
-              minWidth: 30,
-              textAlign: "right",
-            }}
-          >
-            {zoomPct}%
-          </span>
-          <svg
-            width="11"
-            height="11"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            style={{ color: "var(--hi)" }}
-          >
-            <circle cx="11" cy="11" r="8" />
-            <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            <line x1="11" y1="8" x2="11" y2="14" />
-            <line x1="8" y1="11" x2="14" y2="11" />
-          </svg>
           <div style={{ width: 1, height: 16, background: "var(--bdm)" }} />
           <div
             style={{
