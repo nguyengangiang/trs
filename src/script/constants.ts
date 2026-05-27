@@ -86,7 +86,28 @@ export const VN_LUNAR = new Set([
 
 export const REQUIRED_FORM_FIELDS = [
   "factory", "brand", "season", "item", "stype", "color",
-  "reqdate", "reqtime", "estHours", "incharge",
+  "incharge",
+] as const;
+
+export const FACTORIES = [
+  "YIC HANAM",
+  "YIC ONE",
+  "LINH ĐÀM",
+  "YIC QUÝ NINH",
+  "SUBCON",
+] as const;
+
+export const BRANDS = [
+  "KOLON CHINA",
+  "KOLON SPORT",
+  "VUORI",
+  "BLACK DIAMOND",
+  "FIGS",
+  "RIDESTORE",
+  "AETHER",
+  "COTOPAXI",
+  "DESCENTE CHINA",
+  "YIC ODM",
 ] as const;
 
 export const EMPTY_NEW_FORM = {
@@ -104,7 +125,7 @@ export const EMPTY_NEW_FORM = {
   size: "",
   qty: "",
   worksheet: "",
-  worksheetFile: "",
+  worksheetFiles: [],
   pattern: "",
   patternDate: "",
   fabricDate: "",

@@ -1,5 +1,6 @@
-import type { MouseEvent } from "react";
+import type { ChangeEvent, MouseEvent } from "react";
 import { useApp } from "./script";
+import { WORK_HOURS } from "./script/constants";
 import {
   getStatus,
   initials,
@@ -11,7 +12,15 @@ import {
 import type { Assignment, Sampler } from "./script/types";
 
 function Modal() {
-  const { modalItem, items, assignments, handlersByType, closeModal, openModal } = useApp();
+  const {
+    modalItem,
+    items,
+    assignments,
+    handlersByType,
+    closeModal,
+    openModal,
+    updateScheduleField,
+  } = useApp();
   if (!modalItem) return null;
   const d = modalItem;
 
@@ -34,6 +43,12 @@ function Modal() {
   const onOverlay = (e: MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) closeModal();
   };
+
+  const onSchedule =
+    (key: "reqdate" | "reqtime" | "estHours") =>
+    (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      updateScheduleField(d.no, key, e.target.value);
+    };
 
   return (
     <div className="overlay show" id="overlay" onClick={onOverlay}>
@@ -113,7 +128,9 @@ function Modal() {
               <span className="dk">Worksheet</span>
               <span className="dv">
                 {d.worksheet || "—"}
-                {d.worksheetFile ? ` · ${d.worksheetFile}` : ""}
+                {d.worksheetFiles?.length
+                  ? ` · ${d.worksheetFiles.join(", ")}`
+                  : ""}
               </span>
             </div>
             <div className="drow">
@@ -134,7 +151,7 @@ function Modal() {
           </div>
 
           <div className="msec">
-            <p className="mstitle">Assigned to</p>
+            <p className="mstitle">Person In Charge</p>
             <div className="drow">
               <span className="dk">In charge</span>
               <span className="dv">{d.incharge || "—"}</span>

@@ -1,17 +1,15 @@
-import type { ChangeEvent, DragEvent } from "react";
+import { useMemo, useState, type ChangeEvent, type DragEvent } from "react";
 import { useApp } from "./script";
-import { REQUEST_TYPE_ROLE, WORK_HOURS } from "./script/constants";
+import { BRANDS, FACTORIES, REQUEST_TYPE_ROLE } from "./script/constants";
+import { AttachmentButton } from "./AttachmentButton";
 import { RequestCard } from "./script/RequestCard";
 import { initials, stripeClr } from "./script/utils";
 import type { NewRequestForm } from "./script/types";
 
-function Request() {
+function SampleRequest() {
   const {
     newForm,
     setNewFormField,
-    setWorksheetFile,
-    registerWorksheetInput,
-    triggerWorksheetInput,
     submitRequest,
     submitting,
     resetForm,
@@ -33,6 +31,28 @@ function Request() {
   const roleLabel = REQUEST_TYPE_ROLE[requestType];
   const totalForType = activeItems.length + finishedItems.length;
 
+  const [customBrands, setCustomBrands] = useState<string[]>([]);
+  const [showBrandInput, setShowBrandInput] = useState(false);
+  const [brandDraft, setBrandDraft] = useState("");
+
+  const brandOptions = useMemo(() => {
+    const names = new Set<string>([...BRANDS, ...customBrands]);
+    if (newForm.brand) names.add(newForm.brand);
+    return [...names];
+  }, [customBrands, newForm.brand]);
+
+  const addCustomBrand = () => {
+    const name = brandDraft.trim();
+    if (!name) {
+      setShowBrandInput(false);
+      return;
+    }
+    setCustomBrands((prev) => (prev.includes(name) ? prev : [...prev, name]));
+    setNewFormField("brand", name);
+    setBrandDraft("");
+    setShowBrandInput(false);
+  };
+
   const set =
     <K extends keyof NewRequestForm>(key: K) =>
     (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
@@ -42,17 +62,6 @@ function Request() {
     setNewFormField(key, value as never);
 
   const errCls = (key: string) => (formErrors.has(key) ? " er" : "");
-
-  const onWorksheetFile = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    setWorksheetFile(file?.name ?? "");
-  };
-
-  const wsLabel = newForm.worksheetFile
-    ? newForm.worksheetFile.length > 12
-      ? `${newForm.worksheetFile.slice(0, 10)}…`
-      : newForm.worksheetFile
-    : "Attach";
 
   const onLaneDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -95,32 +104,62 @@ function Request() {
                 onChange={set("factory")}
               >
                 <option value="">Select</option>
-                <option>YIC HANAM</option>
-                <option>YIC ONE</option>
+                {FACTORIES.map((f) => (
+                  <option key={f} value={f}>
+                    {f}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="fld">
               <label className="lbl">
                 Brand <span className="req">*</span>
               </label>
-              <select
-                id="fb"
-                className={errCls("brand").trim()}
-                value={newForm.brand}
-                onChange={set("brand")}
-              >
-                <option value="">Select</option>
-                <option>KOLON CHINA</option>
-                <option>KOLON SPORT</option>
-                <option>VUORI</option>
-                <option>BLACK DIAMOND</option>
-                <option>FIGS</option>
-                <option>RIDESTORE</option>
-                <option>AETHER</option>
-                <option>COTOPAXI</option>
-                <option>DESCENTE CHINA</option>
-                <option>YIC ODM</option>
-              </select>
+              <div style={{ display: "flex", gap: 6 }}>
+                <select
+                  id="fb"
+                  className={errCls("brand").trim()}
+                  style={{ flex: 1 }}
+                  value={newForm.brand}
+                  onChange={set("brand")}
+                >
+                  <option value="">Select</option>
+                  {brandOptions.map((b) => (
+                    <option key={b} value={b}>
+                      {b}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  className="fld-add"
+                  title="Add brand"
+                  aria-label="Add brand"
+                  onClick={() => setShowBrandInput((v) => !v)}
+                >
+                  +
+                </button>
+              </div>
+              {showBrandInput && (
+                <div style={{ display: "flex", gap: 6, marginTop: 4 }}>
+                  <input
+                    type="text"
+                    placeholder="Brand name"
+                    value={brandDraft}
+                    onChange={(e) => setBrandDraft(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        addCustomBrand();
+                      }
+                    }}
+                    autoFocus
+                  />
+                  <button type="button" className="fld-add ok" onClick={addCustomBrand}>
+                    Add
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -208,36 +247,6 @@ function Request() {
 
           <div className="g3" style={{ marginBottom: 6 }}>
             <div className="fld">
-              <label className="lbl">TP SMV</label>
-              <input
-                id="fsmv-tp"
-                placeholder="e.g. 18h"
-                value={newForm.smvTP}
-                onChange={set("smvTP")}
-              />
-            </div>
-            <div className="fld">
-              <label className="lbl">Sample SMV</label>
-              <input
-                id="fsmv-spl"
-                placeholder="e.g. 18h"
-                value={newForm.smvSPL}
-                onChange={set("smvSPL")}
-              />
-            </div>
-            <div className="fld">
-              <label className="lbl">Bulk SMV</label>
-              <input
-                id="fsmv-blk"
-                placeholder="e.g. 18h"
-                value={newForm.smvBLK}
-                onChange={set("smvBLK")}
-              />
-            </div>
-          </div>
-
-          <div className="g3" style={{ marginBottom: 6 }}>
-            <div className="fld">
               <label className="lbl">
                 Sample type <span className="req">*</span>
               </label>
@@ -313,28 +322,10 @@ function Request() {
                 />
                 <span>Not available</span>
               </label>
-              <label
-                className="rpill rpill-att"
-                onClick={triggerWorksheetInput}
-              >
-                <svg
-                  width="11"
-                  height="11"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                >
-                  <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
-                </svg>
-                <span id="ws-att-lbl">{wsLabel}</span>
-              </label>
-              <input
-                type="file"
+              <AttachmentButton
                 id="ws-att"
-                ref={registerWorksheetInput}
-                style={{ display: "none" }}
-                onChange={onWorksheetFile}
+                files={newForm.worksheetFiles}
+                onFilesChange={(files) => setNewFormField("worksheetFiles", files)}
               />
             </div>
           </div>
@@ -361,6 +352,7 @@ function Request() {
                 </label>
               ))}
             </div>
+
           </div>
 
           <div className="g2" style={{ marginBottom: 8 }}>
@@ -423,59 +415,7 @@ function Request() {
         <div className="dvd" />
 
         <div className="sec">
-          <p className="slbl">Schedule</p>
-          <div className="g2">
-            <div className="fld">
-              <label className="lbl">
-                Request date <span className="req">*</span>
-              </label>
-              <div style={{ display: "flex", gap: 6 }}>
-                <input
-                  type="date"
-                  id="frq"
-                  style={{ flex: 1 }}
-                  className={errCls("reqdate").trim()}
-                  value={newForm.reqdate}
-                  onChange={set("reqdate")}
-                />
-                <select
-                  id="frt"
-                  style={{ width: 96 }}
-                  className={errCls("reqtime").trim()}
-                  value={newForm.reqtime}
-                  onChange={set("reqtime")}
-                >
-                  <option value="">Start</option>
-                  {WORK_HOURS.map((h) => (
-                    <option key={h} value={h}>
-                      {h}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div className="fld">
-              <label className="lbl">
-                Est. working hrs <span className="req">*</span>
-              </label>
-              <input
-                type="number"
-                id="feh"
-                min={0.5}
-                step={0.5}
-                className={errCls("estHours").trim()}
-                value={newForm.estHours}
-                onChange={set("estHours")}
-                placeholder="e.g. 4"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="dvd" />
-
-        <div className="sec">
-          <p className="slbl">Assigned to</p>
+          <p className="slbl">Person In Charge</p>
           <div className="g2" style={{ marginBottom: 6 }}>
             <div className="fld">
               <label className="lbl">
@@ -619,7 +559,76 @@ function Request() {
                   <circle cx="12" cy="12" r="10" />
                   <polyline points="12 6 12 12 16 14" />
                 </svg>
-                Active
+                Not yet assigned
+              </span>
+              <span className="cbadge" id="cnt" style={{ marginLeft: "auto" }}>
+                {notAssignedItems.length} item
+                {notAssignedItems.length !== 1 ? "s" : ""}
+              </span>
+            </div>
+
+            <div className="sub-section">
+              {activeItems.length > 0 && (
+                <div className="drag-hint" id="drag-hint">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20" />
+                  </svg>
+                  Drag cards onto a sampler to assign
+                </div>
+              )}
+              {activeItems.length === 0 ? (
+                <div id="emp" className="empty">
+                  <div className="eicon">
+                    <svg viewBox="0 0 24 24">
+                      <rect x="4" y="4" width="16" height="16" rx="2" />
+                      <line x1="8" y1="9" x2="16" y2="9" />
+                      <line x1="8" y1="13" x2="14" y2="13" />
+                    </svg>
+                  </div>
+                  <p className="empty-t">No active requests</p>
+                  <p className="empty-s">Drag a card onto a sampler to assign.</p>
+                </div>
+              ) : (
+                <div className="cgrid" id="cg">
+                  {activeItems.map((d, i) => (
+                    <RequestCard
+                      key={d.no}
+                      item={d}
+                      index={i}
+                      showActions
+                      assignments={assignments}
+                      samplers={handlers}
+                      onOpen={openModal}
+                      onEdit={openEditModal}
+                      onCancel={cancelRequest}
+                      onDragStart={setDraggedNo}
+                      onDragEnd={() => setDraggedNo(null)}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="sub-divider" style={{ marginTop: 4 }}>
+              <span className="sub-divider-label" style={{ color: "var(--mu)" }}>
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+                Request from Sales
               </span>
               <span className="cbadge" id="cnt" style={{ marginLeft: "auto" }}>
                 {activeItems.length} / {totalForType} item
@@ -676,6 +685,8 @@ function Request() {
               )}
             </div>
           </div>
+
+          
 
           <div className="samplers-col" id="samplers-col">
             <div className="samplers-head">
@@ -846,4 +857,4 @@ function Request() {
   );
 }
 
-export default Request;
+export default SampleRequest;

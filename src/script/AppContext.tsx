@@ -88,7 +88,6 @@ export type AppContextValue = {
   resetForm: () => void;
   setNewFormField: <K extends keyof NewRequestForm>(key: K, value: NewRequestForm[K]) => void;
   setEditFormField: <K extends keyof EditForm>(key: K, value: EditForm[K]) => void;
-  setWorksheetFile: (name: string) => void;
   submitRequest: () => Promise<void>;
   nudge: (days: number) => void;
   goToday: () => void;
@@ -104,14 +103,17 @@ export type AppContextValue = {
   showToast: (msg: string, ok: boolean) => void;
   openModal: (no: number) => void;
   closeModal: () => void;
+  updateScheduleField: (
+    no: number,
+    key: "reqdate" | "reqtime" | "estHours",
+    value: string,
+  ) => void;
   openEditModal: (no: number) => void;
   closeEditModal: () => void;
   saveEdit: () => void;
   cancelRequest: (no: number) => void;
   slotAction: (sid: string, no: number, act: "accept" | "finish" | "unaccept" | "rm") => void;
   dropOnLane: (sid: string, no: number) => void;
-  triggerWorksheetInput: () => void;
-  registerWorksheetInput: (el: HTMLInputElement | null) => void;
 };
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -247,7 +249,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [hw, setHw] = useState(38);
   const [dw, setDw] = useState(60);
   const [submitting, setSubmitting] = useState(false);
-  const wsInputRef = useRef<HTMLInputElement | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const showToast = useCallback((msg: string, ok: boolean) => {
@@ -274,18 +275,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const setEditFormField = useCallback(<K extends keyof EditForm>(key: K, value: EditForm[K]) => {
     setEditForm((f) => ({ ...f, [key]: value }));
-  }, []);
-
-  const setWorksheetFile = useCallback((name: string) => {
-    setNewForm((f) => ({ ...f, worksheetFile: name }));
-  }, []);
-
-  const registerWorksheetInput = useCallback((el: HTMLInputElement | null) => {
-    wsInputRef.current = el;
-  }, []);
-
-  const triggerWorksheetInput = useCallback(() => {
-    wsInputRef.current?.click();
   }, []);
 
   const nudge = useCallback((days: number) => {
@@ -362,6 +351,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const openModal = useCallback((no: number) => setModalNo(no), []);
   const closeModal = useCallback(() => setModalNo(null), []);
 
+  const updateScheduleField = useCallback(
+    (no: number, key: "reqdate" | "reqtime" | "estHours", value: string) => {
+      setItems((prev) =>
+        prev.map((item) =>
+          item.no === no ? { ...item, [key]: value.trim() } : item,
+        ),
+      );
+    },
+    [],
+  );
+
   const openEditModal = useCallback(
     (no: number) => {
       const d = items.find((x) => x.no === no);
@@ -407,7 +407,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       size: newForm.size.trim(),
       qty: newForm.qty.trim(),
       worksheet: newForm.worksheet,
-      worksheetFile: newForm.worksheetFile,
+      worksheetFiles: newForm.worksheetFiles,
       pattern: newForm.pattern,
       patternDate: newForm.patternDate,
       fabricDate: newForm.fabricDate,
@@ -624,7 +624,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       resetForm,
       setNewFormField,
       setEditFormField,
-      setWorksheetFile,
       submitRequest,
       nudge,
       goToday,
@@ -637,14 +636,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       showToast,
       openModal,
       closeModal,
+      updateScheduleField,
       openEditModal,
       closeEditModal,
       saveEdit,
       cancelRequest,
       slotAction,
       dropOnLane,
-      triggerWorksheetInput,
-      registerWorksheetInput,
     }),
     [
       items, handlers, handlersByType, allHandlers, requestType, typedItems, vd, flt, activeView, toast, modalNo,
@@ -652,10 +650,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       formErrors, assignments, draggedNo, schZoom, hw, dw, zoomPct, submitting,
       activeItems, finishedItems, monthFiltered, summary, brandFilters, modalItem,
       reportData, samplerLanes, approvedRows,
-      resetForm, setNewFormField, setEditFormField, setWorksheetFile, submitRequest,
+      resetForm, setNewFormField, setEditFormField, submitRequest,
       nudge, goToday, setView, setRequestType, addHandler, setFilter, setZoom, adjustZoom, showToast,
-      openModal, closeModal, openEditModal, closeEditModal, saveEdit, cancelRequest,
-      slotAction, dropOnLane, triggerWorksheetInput, registerWorksheetInput,
+      openModal, closeModal, updateScheduleField, openEditModal, closeEditModal, saveEdit, cancelRequest,
+      slotAction, dropOnLane,
     ],
   );
 

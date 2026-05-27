@@ -34,7 +34,7 @@ export interface RequestItem {
   size: string;
   qty: string;
   worksheet: string;
-  worksheetFile: string;
+  worksheetFiles: string[];
   pattern: string;
   patternDate: string;
   fabricDate: string;
@@ -64,7 +64,7 @@ export interface NewRequestForm {
   size: string;
   qty: string;
   worksheet: string;
-  worksheetFile: string;
+  worksheetFiles: string[];
   pattern: string;
   patternDate: string;
   fabricDate: string;

@@ -316,6 +316,34 @@ label {
   gap: 4px
 }
 
+.fld-add {
+  flex-shrink: 0;
+  width: 32px;
+  padding: 0;
+  font-family: var(--f);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--tx);
+  background: var(--sf2);
+  border: 1px solid var(--bdm);
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: border-color .12s, background .12s;
+}
+
+.fld-add:hover {
+  border-color: var(--tx);
+  background: var(--sf);
+}
+
+.fld-add.ok {
+  width: auto;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .lbl {
   font-size: 10px;
   font-weight: 700;

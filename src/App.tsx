@@ -1,7 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AppProvider, useApp } from "./script";
 import Header from "./Header";
-import Request from "./Request";
+import SampleRequest from "./SampleRequest.tsx";
 import Schedule from "./Schedule";
 import Report from "./Report";
 import Modal from "./Modal.tsx";
@@ -33,7 +33,7 @@ function AppShell() {
           path="/request"
           element={
             <div className="view on" id="vf">
-              <Request />
+              <SampleRequest />
             </div>
           }
         />

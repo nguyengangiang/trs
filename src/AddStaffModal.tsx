@@ -1,7 +1,7 @@
 import type { MouseEvent } from "react";
 import { useState } from "react";
 import { useApp } from "./script";
-import { REQUEST_TYPE_LABEL } from "./script/constants";
+import { FACTORIES, REQUEST_TYPE_LABEL } from "./script/constants";
 import type { RequestType } from "./script/types";
 
 const DEPARTMENTS: RequestType[] = ["sample", "pattern", "smv"];
@@ -16,6 +16,7 @@ function AddStaffModal({ onClose }: Props) {
 
   const [name, setName] = useState("");
   const [eid, setEid] = useState("");
+  const [factory, setFactory] = useState("");
   const [department, setDepartment] = useState<RequestType>(requestType);
   const [level, setLevel] = useState<(typeof LEVELS)[number]>("Staff");
   const [errors, setErrors] = useState<Set<string>>(new Set());
@@ -104,6 +105,22 @@ function AddStaffModal({ onClose }: Props) {
                 />
               </div>
             </div>
+            <div className="fld">
+                <label className="lbl">
+                  Factory <span className="req">*</span>
+                </label>
+                <select
+                  value={factory}
+                  onChange={(e) => setFactory(e.target.value)}
+                >
+                  {FACTORIES.map((f) => (
+                    <option key={f} value={f}>
+                      {f}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
 
             <div className="g2">
               <div className="fld">
