@@ -1,6 +1,5 @@
-import type { ChangeEvent, MouseEvent } from "react";
+import type { MouseEvent } from "react";
 import { useApp } from "./script";
-import { WORK_HOURS } from "./script/constants";
 import {
   getStatus,
   initials,
@@ -19,7 +18,6 @@ function Modal() {
     handlersByType,
     closeModal,
     openModal,
-    updateScheduleField,
   } = useApp();
   if (!modalItem) return null;
   const d = modalItem;
@@ -43,12 +41,6 @@ function Modal() {
   const onOverlay = (e: MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) closeModal();
   };
-
-  const onSchedule =
-    (key: "reqdate" | "reqtime" | "estHours") =>
-    (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-      updateScheduleField(d.no, key, e.target.value);
-    };
 
   return (
     <div className="overlay show" id="overlay" onClick={onOverlay}>

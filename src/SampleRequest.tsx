@@ -561,10 +561,10 @@ function SampleRequest() {
                 </svg>
                 Not yet assigned
               </span>
-              <span className="cbadge" id="cnt" style={{ marginLeft: "auto" }}>
+              {/* <span className="cbadge" id="cnt" style={{ marginLeft: "auto" }}>
                 {notAssignedItems.length} item
                 {notAssignedItems.length !== 1 ? "s" : ""}
-              </span>
+              </span> */}
             </div>
 
             <div className="sub-section">

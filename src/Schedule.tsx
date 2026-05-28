@@ -64,7 +64,6 @@ function Schedule() {
     setFilter,
     schZoom,
     setZoom,
-    zoomPct,
     samplerLanes,
     approvedRows,
     handlers,

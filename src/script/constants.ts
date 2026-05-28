@@ -1,4 +1,4 @@
-import type { RequestType, Sampler } from "./types";
+import type { NewRequestForm, RequestType, Sampler } from "./types";
 
 export const GAS_URL =
   "https://script.google.com/macros/s/AKfycbwZKh1HjcSUd--mDBjQek5UDx1BsV2UR9H7yfCkvxSvOIPtvZdB64hsN18dwe05yrXMLw/exec";
@@ -110,7 +110,7 @@ export const BRANDS = [
   "YIC ODM",
 ] as const;
 
-export const EMPTY_NEW_FORM = {
+export const EMPTY_NEW_FORM: NewRequestForm = {
   factory: "",
   brand: "",
   season: "",
@@ -137,4 +137,4 @@ export const EMPTY_NEW_FORM = {
   estHours: "",
   incharge: "",
   remark: "",
-} as const;
+};
